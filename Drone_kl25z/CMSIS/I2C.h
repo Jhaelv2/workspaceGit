@@ -32,11 +32,28 @@
 #define I2C_Wait()             while((I2C0->S & I2C_S_IICIF_MASK)==0) {} \
                                I2C0->S |= I2C_S_IICIF_MASK;
 
+#define Init_pins()				SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK | SIM_SCGC5_PORTB_MASK;\
+								PORTB->PCR[18] |= PORT_PCR_MUX(1);\
+								PORTB->PCR[19] |= PORT_PCR_MUX(1);\
+								PORTD->PCR[1] |= PORT_PCR_MUX(1);\
+								GPIOB->PDDR |= ((1<<19) | (1<<18));\
+								GPIOD->PDDR |= (1<<1);
+
+#define I2C_Init()				SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;\
+								SIM->SCGC5 |= SIM_SCGC5_PORTE_MASK;\
+								PORTE->PCR[24] = PORT_PCR_MUX(5);\
+								PORTE->PCR[25] = PORT_PCR_MUX(5);\
+								I2C0->F  = 0x14;\
+								I2C0->C1 = I2C_C1_IICEN_MASK;\
+								SIM->SCGC5 |= SIM_SCGC5_PORTA_MASK;\
+								PORTA->PCR[14] |= (0|PORT_PCR_ISF_MASK|PORT_PCR_MUX(0x1)|PORT_PCR_IRQC(0xA));\
+								NVIC_EnableIRQ(PORTA_IRQn);
+
+
 void           I2C_WriteRegister      (unsigned char u8SlaveAddress, unsigned char u8RegisterAddress, /*unsigned*/ char u8Data);
 unsigned char  I2C_ReadRegister       (unsigned char u8SlaveAddress, unsigned char u8RegisterAddress);
 void           I2C_ReadMultiRegisters (unsigned char u8SlaveAddress, unsigned char u8RegisterAddress, unsigned char n, unsigned char *r);
-void           Pause                  (int number);
-void           Init_pins              (void);
+void		   Pause		          (int number);
 
 
 #endif /* I2C_H_ */
