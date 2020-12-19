@@ -98,16 +98,3 @@ void Pause(int number)
 	};
 }
 
-void Init_pins(void)
-{
-	SIM->SCGC5 |= SIM_SCGC5_PORTD_MASK | SIM_SCGC5_PORTB_MASK;
-
-	PORTB->PCR[18] |= PORT_PCR_MUX(1);
-	PORTB->PCR[19] |= PORT_PCR_MUX(1);
-	PORTD->PCR[1] |= PORT_PCR_MUX(1);
-
-	GPIOB->PDDR |= ((1<<19) | (1<<18));
-	GPIOD->PDDR |= (1<<1);
-
-}
-
