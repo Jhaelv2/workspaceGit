@@ -11,8 +11,8 @@
 #include "MKL25Z4.h"
 #include "SERVICIOS.h"
 
-#define TAMANO_BUFFER_RX 16
-#define TAMANO_BUFFER_TX 1000
+#define RxBufferSize 16
+#define TxBufferSize 500
 
 //----------------------------------------------------------------------------
 //
@@ -29,27 +29,24 @@ typedef enum
 
 typedef union
 {
-	uint8_t All;
+	uint8_t Byte;
 	struct
-	{							   //  XXXXXXXX Condiciones del Evento
-		uint8_t Inicializando :1,//  ||||||||_ B0  =  [1:Si  0:No]
-		      EnServicio      :1,//  |||||||__ B1  =  [1:Si  0:No]
-			  DatoDisponible  :1,//  ||||||___ B2  =  [1:Si  0:No] Si la edicion fue manual o externa
-		      Bit3			  :1,//  |||||____ B3  =  [1:Si  0:No]
-		      Bit4            :1,//  ||||_____ B4  =  [1:Si  0:No]
-		      Bit5            :1,//  |||______ B5  =  [1:Si  0:No]
-		      Bit6            :1,//  ||_______ B6  =  [1:Si  0:No]
-		      Bit7            :1;//  |________ B7  =  [1:Si  0:No]
-	}Bit;
-}uCondicionEvento;
+	{
+		uint8_t Configurando   :1,//B0
+		        Ocupado        :1,//B1
+			    DatoDisponible :1,//B2
+		        BitsRestantes  :5;//B3,B4,B5,B6,B7
+
+	}Bits;
+}uEstadoDeTransmicion;
 
 typedef struct
 {
-	uint8_t  u8Buffer[TAMANO_BUFFER_RX];
-	uint16_t u16PosicionDatoRecibido;
-	uint16_t u16PosicionDatoExtraido;
-	uCondicionEvento flag;
-}sRx;
+	uint8_t  u8Buffer[RxBufferSize];
+	uint16_t u16IndiceUltimoDatoEntrante;
+	uint16_t u16IndiceUltimoDatoUSaliente;
+	uEstadoDeTransmicion Status;
+}sRecibe;
 
 typedef struct
 {
@@ -60,20 +57,20 @@ typedef struct
 	uint8_t  DatoCargado   :1 ;
 	uint8_t  u8TamanoDeBuffer;
 
-}sTx;
+}sTransmite;
 
 typedef struct
 {
-	sRx  Rx;
-	sTx  Tx;
+	sRecibe     Rx;
+	sTransmite  Tx;
 }sUart;
 
 typedef enum
 {
-  eBT_Init = 0,
-  eBT_ConsultaDatoDisponible,
-  eBT_TtansmiteDatoActual,
-  eBT_ConsultaTransmicionCompleta,
+  SMTX_Init = 0,
+  SMTX_ConsultaDatoDisponible,
+  SMTX_TtansmiteDatoActual,
+  SMTX_ConsultaTransmicionCompleta,
 }eBufferTx;
 
 
@@ -89,17 +86,17 @@ typedef enum
 // Prototipos de funcionesd
 //
 //----------------------------------------------------------------------------
-void    UARTx_Configuracion     (uint8_t * puTxBuffer, uint8_t u8TxBufferSize);
-void    UART_PushBufferRx       (uint8_t  u8DatoCapturado);
-void    UART_BufferTx           (uint8_t  * pu8Buffer);
-proceso PullBufferRx            (uint8_t  * pu8Dato);
-void    UART_BufferTxServicio   (uint8_t  * pu8DatoParaBuffer);
-void    UART_CharToBufferTx     (uint8_t  u8Char);
-void    UART_FloatToBufferTx    (float  u8DatoFloat);
-void    UART_ShortToBufferTx    (uint16_t u8DatoShort);
-void    UART_IntToBufferTx      (uint32_t u32DatoInt);
-void    UART_AtencionUartTx     (void);
-void    UART0_BaudRateConsulta  (void);
-void    UART0_NuevoBaudRate     (uint32_t u8BaudRate);
+void    UARTx_Configuracion      (uint8_t * puTxBuffer, uint8_t u8TxBufferSize);
+void    UART_Push_Buffer_Rx      (uint8_t  u8DatoCapturado);
+void    UART_Buffer_Tx           (uint8_t  * pu8Buffer);
+proceso UART_Pull_Buffer_Rx      (uint8_t  * pu8Dato);
+void    UART_Buffer_Tx_Servicio  (uint8_t  * pu8DatoParaBuffer);
+void    UART_CharTo_Buffer_Tx    (uint8_t  u8Char);
+void    UART_Float_To_Buffer_Tx  (float  u8DatoFloat);
+void    UART_Short_To_Buffer_Tx  (uint16_t u8DatoShort);
+void    UART_Int_To_Buffer_Tx    (uint32_t u32DatoInt);
+void    UART_Gestion_Tx    (void);
+void    UART0_BaudRate_Consulta  (void);
+void    UART0_Nuevo_BaudRate     (uint32_t u8BaudRate);
 
 #endif /* UART_H_ */

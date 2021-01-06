@@ -56,34 +56,34 @@ void UARTx_Configuracion(uint8_t * puTxBuffer, uint8_t u8TxBufferSize)
 			  |  UART_C2_TE(1)
 			  |  UART_C2_RE(1);
 
-	gsUart.Rx.u16PosicionDatoExtraido = 0;
-	gsUart.Rx.u16PosicionDatoRecibido = 0;
+	gsUart.Rx.u16IndiceUltimoDatoUSaliente = 0;
+	gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
 	gsUart.Tx.u16PosicionDatoTransmitido = 0;
 	gsUart.Tx.u8TamanoDeBuffer = u8TxBufferSize;
     gsUart.Tx.pu8BufferTx = puTxBuffer;
-    gsUart.Rx.flag.All = 0;
+    gsUart.Rx.Status.Byte = 0;
 	NVIC_EnableIRQ(UART0_IRQn);
 	TAMANOX = sizeof(gsUart);
 }
 
 /********************************************************************************************************************************
-*Nombre:       UART_PushBufferRx
+*Nombre:       UART_Push_Buffer_Rx
 *
 *Descripcion:  Llena el buffer "DatosRecibidos" con los datos obtenidos en
 *              rutina de interrupcion de Rx.
 *
-*Entradas:     u8DatoCapturado: Es el dato de 8 bits que entro mediante Rx
+*Entradas:     u8DatoCapturado: Es el dato de 8 Bitss que entro mediante Rx
 *
 *Salidas:      Ninguna.
 ********************************************************************************************************************************/
-void UART_PushBufferRx(uint8_t u8DatoCapturado)
+void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 {
-	gsUart.Rx.u8Buffer[gsUart.Rx.u16PosicionDatoRecibido] = u8DatoCapturado;
-	gsUart.Rx.u16PosicionDatoRecibido ++;
+	gsUart.Rx.u8Buffer[gsUart.Rx.u16IndiceUltimoDatoEntrante] = u8ByteRxD;
+	gsUart.Rx.u16IndiceUltimoDatoEntrante ++;
 
-	if(gsUart.Rx.u16PosicionDatoRecibido == TAMANO_BUFFER_RX)
-	gsUart.Rx.u16PosicionDatoRecibido = 0;
-	gsUart.Rx.flag.Bit.DatoDisponible = 1;
+	if(gsUart.Rx.u16IndiceUltimoDatoEntrante == RxBufferSize)
+	gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
+	gsUart.Rx.Status.Bits.DatoDisponible = 1;
 	return;
 }
 /********************************************************************************************************************************
@@ -95,67 +95,67 @@ void UART_PushBufferRx(uint8_t u8DatoCapturado)
 *
 *Salidas:     uint8_t SUCCES FAIL.
 ********************************************************************************************************************************/
-proceso PullBufferRx (uint8_t * pu8Dato)
+proceso UART_Pull_Buffer_Rx (uint8_t * pu8Dato)
 {
 	//uint8_t u8Dato = 0;
-	if(gsUart.Rx.flag.Bit.DatoDisponible)
+	if(gsUart.Rx.Status.Bits.DatoDisponible)
 	{
-		 *pu8Dato  = gsUart.Rx.u8Buffer[gsUart.Rx.u16PosicionDatoExtraido];
-		 gsUart.Rx.u16PosicionDatoExtraido ++;
-	     if(gsUart.Rx.u16PosicionDatoExtraido == TAMANO_BUFFER_RX)
-			 gsUart.Rx.u16PosicionDatoExtraido = 0;
-		 if(gsUart.Rx.u16PosicionDatoExtraido == gsUart.Rx.u16PosicionDatoRecibido)
-			 gsUart.Rx.flag.Bit.DatoDisponible = 0;
+		 *pu8Dato  = gsUart.Rx.u8Buffer[gsUart.Rx.u16IndiceUltimoDatoUSaliente];
+		 gsUart.Rx.u16IndiceUltimoDatoUSaliente ++;
+	     if(gsUart.Rx.u16IndiceUltimoDatoUSaliente == RxBufferSize)
+			 gsUart.Rx.u16IndiceUltimoDatoUSaliente = 0;
+		 if(gsUart.Rx.u16IndiceUltimoDatoUSaliente == gsUart.Rx.u16IndiceUltimoDatoEntrante)
+			 gsUart.Rx.Status.Bits.DatoDisponible = 0;
 		 return Completo;
 	}
 	return Fallo;
 }
 /***********************************************************************************************************************************
-*Nombre:       UART_BufferTxServicio
+*Nombre:       UART_Buffer_TxServicio
 *
 *Descripcion:  Se encarga de que el siguiente dato introducido sea posicionado en la siguiente posicion
 *              disponible del BufferTx, si el buuffer esta lleno reinica las posicionne (siguiente = 0)
 *
-*Parametros:   DatoParaBuffer; Bite de entrada a ser almacenado en el buffer de transmicion.
+*Parametros:   DatoParaBuffer; Bitse de entrada a ser almacenado en el buffer de transmicion.
 *
 *Return:       Ninguno.
 ***********************************************************************************************************************************/
-void UART_BufferTxServicio(uint8_t * pu8DatoParaBuffer)
+void UART_Buffer_TxServicio(uint8_t * pu8DatoParaBuffer)
 {
    *(gsUart.Tx.pu8BufferTx + gsUart.Tx.u16PosicionDatoPortransmitir) = * pu8DatoParaBuffer;
 	gsUart.Tx.u16PosicionDatoPortransmitir++;
 
 	if(gsUart.Tx.u16PosicionDatoPortransmitir == gsUart.Tx.u8TamanoDeBuffer)
 	gsUart.Tx.u16PosicionDatoPortransmitir = 0;
-	gsUart.Rx.flag.Bit.DatoDisponible = 1;
+	gsUart.Rx.Status.Bits.DatoDisponible = 1;
 	return;
 }
 
 /********************************************************************************************************************************
-*Nombre:        UART_BufferTx
+*Nombre:        UART_Buffer_Tx
 *
-*Definition:    Recibe una cadena de caracteres de 8 bits y la usa para llenar (Byte a Byte) el
+*Definition:    Recibe una cadena de caracteres de 8 Bitss y la usa para llenar (Byte a Byte) el
 *               el buffer de transmicion de datos.
 *
 *Entradas:      pu8Buffer; Parametro puntero con la direccion del buffer a transmitir
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_BufferTx (uint8_t * pu8Buffer )
+void UART_Buffer_Tx (uint8_t * pu8Buffer )
 {
 	uint8_t ValorDeByte = *pu8Buffer;
 	while(ValorDeByte != '\0')
 	{
-		UART_BufferTxServicio(&ValorDeByte);
+		UART_Buffer_TxServicio(&ValorDeByte);
 		ValorDeByte = *(++pu8Buffer);
 	}
 	return;
 }
 
 /********************************************************************************************************************************
-*Nombre:        UART_CharToBufferTx
+*Nombre:        UART_CharTo_BufferTx
 *
-*Definition:    Recibe un dato numerico de tamaño char (8bits), el cual es procesado para ser
+*Definition:    Recibe un dato numerico de tamaño char (8Bits), el cual es procesado para ser
 *               para guardar sus unidades, decenas y centenas en un buffer, dicho bugffer es
 *               introducido como parametro en la funcion "TansmiteBuffer" la cual tambien
 *               recibe como parametro el tamaño de dicho buffer.
@@ -164,15 +164,15 @@ void UART_BufferTx (uint8_t * pu8Buffer )
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_CharToBufferTx(uint8_t u8Char)
+void UART_Char_To_BufferTx(uint8_t u8Char)
 {
 	uint8_t u8CharAString[3];
 	sprintf(u8CharAString, "%d", u8Char);
-	UART_BufferTx(u8CharAString);
+	UART_Buffer_Tx(u8CharAString);
 }
 
 /********************************************************************************************************************************
-*Nombre:        UART_ShortToBufferTx
+*Nombre:        UART_Short_To_Buffer_Tx
 *
 *Definition:    Recibe un dato numerico de tipo Short, el cual es procesado mediante la funcion
 *               "sprintf" la cual llena un arreglo con los digitos en ascii del numero.
@@ -182,15 +182,15 @@ void UART_CharToBufferTx(uint8_t u8Char)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_ShortToBufferTx (uint16_t u16DatoShort)
+void UART_Short_To_Buffer_Tx (uint16_t u16DatoShort)
 {
 	uint8_t u8ShortAString[5];
 	sprintf(u8ShortAString,"%u", u16DatoShort);
-	UART_BufferTx(u8ShortAString);
+	UART_Buffer_Tx(u8ShortAString);
 }
 
 /********************************************************************************************************************************
-*Nombre:        UART_IntToBufferTx
+*Nombre:        UART_Int_To_Buffer_Tx
 *
 *Definition:    Recibe un dato numerico de tipo Int, el cual es procesado para ser
 *               introducido en  buffer es
@@ -201,11 +201,11 @@ void UART_ShortToBufferTx (uint16_t u16DatoShort)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void  UART_IntToBufferTx(uint32_t u32DatoInt)
+void  UART_Int_To_Buffer_Tx(uint32_t u32DatoInt)
 {
 	uint8_t u8IntAString[10];
 	sprintf(u8IntAString,"%u", u32DatoInt);
-	UART_BufferTx(u8IntAString);
+	UART_Buffer_Tx(u8IntAString);
 	return;
 }
 
@@ -220,16 +220,16 @@ void  UART_IntToBufferTx(uint32_t u32DatoInt)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void  UART_FloatToBufferTx(float  u8DatoFloat)
+void  UART_Float_To_Buffer_Tx(float  u8DatoFloat)
 {
 	uint8_t u8FloatAString[10];
 	sprintf(u8FloatAString,"%f", u8DatoFloat);
-	UART_BufferTx(u8FloatAString);
+	UART_Buffer_Tx(u8FloatAString);
 	return;
 }
 
 /********************************************************************************************************************************
-*Nombre:       UART_AtencionUartTx
+*Nombre:       UART_Gestion_Tx
 *
 *Descripcion:  Maquina de estados para la gestion de la da salida de datos del Buffer Tx
 *
@@ -238,33 +238,33 @@ void  UART_FloatToBufferTx(float  u8DatoFloat)
 *
 *Salidas:      Ninguna.
 ********************************************************************************************************************************/
-void UART_GestionTx(void)
+void UART_Gestion_Tx(void)
 {
-	static uint8_t eBufferTx = eBT_ConsultaDatoDisponible;
+	static uint8_t eBufferTx = SMTX_ConsultaDatoDisponible;
 
 	switch(eBufferTx)
 	{
-    case eBT_ConsultaDatoDisponible:
+    case SMTX_ConsultaDatoDisponible:
     	if(gsUart.Tx.u16PosicionDatoPortransmitir != gsUart.Tx.u16PosicionDatoTransmitido)
     	{
-    		eBufferTx = eBT_TtansmiteDatoActual;
+    		eBufferTx = SMTX_TtansmiteDatoActual;
     	}
     	break;
 
-    case eBT_TtansmiteDatoActual:
+    case SMTX_TtansmiteDatoActual:
 	    (UART0->S1);
 	    (UART0->D);
     	UART0->D   = gsUart.Tx.pu8BufferTx[gsUart.Tx.u16PosicionDatoTransmitido];
-    	eBufferTx = eBT_ConsultaTransmicionCompleta;
+    	eBufferTx = SMTX_ConsultaTransmicionCompleta;
     	break;
 
-    case eBT_ConsultaTransmicionCompleta:
+    case SMTX_ConsultaTransmicionCompleta:
     	if(UART0->S1 & UART_S1_TDRE_MASK)
     	{
     		gsUart.Tx.u16PosicionDatoTransmitido++;
     		if(gsUart.Tx.u16PosicionDatoTransmitido == gsUart.Tx.u8TamanoDeBuffer)
     			gsUart.Tx.u16PosicionDatoTransmitido = 0;
-    		eBufferTx = eBT_ConsultaDatoDisponible;
+    		eBufferTx = SMTX_ConsultaDatoDisponible;
     		UART0->C2 |=  UART_C2_TE(0);
     		UART0->C2 |=  UART_C2_TE(1);
     	}
@@ -274,7 +274,7 @@ void UART_GestionTx(void)
 }
 
 /********************************************************************************************************************************
-*Nombre:        UART0_BaudRateConsulta
+*Nombre:        UART0_BaudRate_Consulta
 *
 *Definicion:    Consulta los valores de los registros que configuran el baud rate del UART0
 *               y los procesa para calcular el baud rate actual del modulo.
@@ -283,7 +283,7 @@ void UART_GestionTx(void)
 *
 *Salidas:       Ninguna.
 *********************************************************************************************************************************/
-void UART0_BaudRateConsulta(void)
+void UART0_BaudRate_Consulta(void)
 {
 	uint8_t  u8SBRHVal;
 	uint16_t u8SBRTotalVal;
@@ -296,19 +296,20 @@ void UART0_BaudRateConsulta(void)
 	u8OSR         = (UART0->C4 & 0b00011111);
 
 	u32BaudRateActual = ((DEFAULT_SYSTEM_CLOCK)/((u8OSR+1)*u8SBRTotalVal));
-	UART_ShortToBufferTx(u32BaudRateActual);
+	UART_Short_To_Buffer_Tx(u32BaudRateActual);
 	return;
 }
 /********************************************************************************************************************************
-*Nombre:        UART2_ModificaBaudRate
+*Nombre:        UART0_Nuevo_BaudRate
 *
-*Definition:    Modifica Baud Rate
+*Definition:    Permite que el usuario especifique un nevo valor de baudrate para el cual seran
+*               calculados los valores de OSR, BRH Y BRL necesarios.
 *
 *Entradas:      u8BaudRate:
 *
 *Salidas:       Ninguna.
 *********************************************************************************************************************************/
-void UART0_NuevoBaudRate(uint32_t u8BaudRate)
+void UART0_Nuevo_BaudRate(uint32_t u8BaudRate)
 {
 	float    u32NuevoSBR;
 	uint32_t u8NuevoSBRH;
@@ -348,7 +349,7 @@ void UART0_NuevoBaudRate(uint32_t u8BaudRate)
 void UART0_RX_TX_IRQHandler(void)
 {
 	if(UART0->S1 & UART_S1_RDRF_MASK);             //Consulta la badera RDRF(Paso 1 pra borrar bandera RDRF)
-	UART_PushBufferRx(UART0->D);
+	UART_Push_Buffer_Rx(UART0->D);
 }
 
 
