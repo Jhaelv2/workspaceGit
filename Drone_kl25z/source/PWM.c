@@ -278,6 +278,30 @@ void PWM_Dutty(uint8_t tpm, uint8_t channel, uint16_t Dutty ){
 
 }
 /********************************************************************************************************************************
+*Nombre:        PWM_Enable
+*
+*Definition:    Rutina para desabilitar un canal de PWM
+*
+*Entradas:      Ninguna.
+*
+*Salidas:       Ninguna.
+*********************************************************************************************************************************/
+void PWM_Enable(uint8_t tpm, uint8_t channel, uint8_t Mode){
+
+	if(tpm==PWM0){
+		TPM0->CONTROLS[channel].CnSC |= Mode ;
+	}
+	else if(tpm==PWM1){
+		TPM1->CONTROLS[channel].CnSC |= Mode ;
+	}
+	else if(tpm==PWM2){
+		TPM2->CONTROLS[channel].CnSC |= Mode ;
+	}
+	else{
+		return;
+	}
+}
+/********************************************************************************************************************************
 *Nombre:        PWM_DISABLE
 *
 *Definition:    Rutina para desabilitar un canal de PWM
@@ -286,8 +310,20 @@ void PWM_Dutty(uint8_t tpm, uint8_t channel, uint16_t Dutty ){
 *
 *Salidas:       Ninguna.
 *********************************************************************************************************************************/
-void PWM_Disable(uint8_t tpm, uint8_t channel, int pin){
+void PWM_Disable(uint8_t tpm, uint8_t channel){
 
+	if(tpm==PWM0){
+		TPM0->CONTROLS[channel].CnSC = PWM_DISABLE;
+	}
+	else if(tpm==PWM1){
+		TPM1->CONTROLS[channel].CnSC = PWM_DISABLE;
+	}
+	else if(tpm==PWM2){
+		TPM2->CONTROLS[channel].CnSC = PWM_DISABLE;
+	}
+	else{
+		return;
+	}
 }
 /********************************************************************************************************************************
 *Nombre:        maquina_colores
@@ -307,6 +343,7 @@ void maquina_colores(void){
 
 	case e_rojo:
   		//RED LED
+		PWM_Enable(PWM2, CH0, PWM_L);
   		for(a=0; a<=100; a++){
   			PWM_Dutty(PWM2, CH0, a);
   			delay(5);
@@ -315,28 +352,34 @@ void maquina_colores(void){
   		  			PWM_Dutty(PWM2, CH0, a);
   		  			delay(5);
   				}
+  				a=101;
   			}
   		}
+  		PWM_Disable(PWM2, CH0);
   		eColors = e_azul;
   		break;
 
 	case e_azul:
   		//BLUE LED
+		PWM_Enable(PWM0, CH1, PWM_L);
   		for(a=0; a<=100; a++){
   			PWM_Dutty(PWM0, CH1, a);
   			delay(5);
   			if(a==100){
   				for(a=100; a>=0; a--){
   		  			PWM_Dutty(PWM0, CH1, a);
-  		  			delay(50);
+  		  			delay(5);
   				}
+  				a=101;
   			}
   		}
+  		PWM_Disable(PWM0, CH1);
   		eColors = e_verde;
   		break;
 
 	case e_verde:
   		//GREEN LED
+		PWM_Enable(PWM2, CH1, PWM_L);
   		for(a=0; a<=100; a++){
   			PWM_Dutty(PWM2, CH1, a);
   			delay(5);
@@ -345,13 +388,17 @@ void maquina_colores(void){
   		  			PWM_Dutty(PWM2, CH1, a);
   		  			delay(5);
   				}
+  				a=101;
   			}
   		}
+  		PWM_Disable(PWM2, CH1);
   		eColors = e_amarillo;
   		break;
 
 	case e_amarillo:
   		//YELLOW LED
+		PWM_Enable(PWM2, CH0, PWM_L);
+		PWM_Enable(PWM2, CH1, PWM_L);
   		for(a=0; a<=100; a++){
   			PWM_Dutty(PWM2, CH1, a);
   			PWM_Dutty(PWM2, CH0, a);
@@ -362,8 +409,81 @@ void maquina_colores(void){
   		  			PWM_Dutty(PWM2, CH0, a);
   		  			delay(5);
   				}
+  				a=101;
   			}
   		}
+  		PWM_Disable(PWM2, CH1);
+  		PWM_Disable(PWM2, CH0);
+  		eColors = e_cyan;
+  		break;
+
+	case e_cyan:
+  		//CYAN LED
+		PWM_Enable(PWM0, CH1, PWM_L);
+		PWM_Enable(PWM2, CH1, PWM_L);
+  		for(a=0; a<=100; a++){
+  			PWM_Dutty(PWM0, CH1, a);
+  			PWM_Dutty(PWM2, CH1, a);
+  			delay(5);
+  			if(a==100){
+  				for(a=100; a>=0; a--){
+  		  			PWM_Dutty(PWM0, CH1, a);
+  		  			PWM_Dutty(PWM2, CH1, a);
+  		  			delay(5);
+  				}
+  				a=101;
+  			}
+  		}
+  		PWM_Disable(PWM0, CH1);
+  		PWM_Disable(PWM2, CH1);
+  		eColors = e_magenta;
+  		break;
+
+	case e_magenta:
+  		//MAGENTA LED
+		PWM_Enable(PWM0, CH1, PWM_L);
+		PWM_Enable(PWM2, CH0, PWM_L);
+  		for(a=0; a<=100; a++){
+  			PWM_Dutty(PWM0, CH1, a);
+  			PWM_Dutty(PWM2, CH0, a);
+  			delay(5);
+  			if(a==100){
+  				for(a=100; a>=0; a--){
+  		  			PWM_Dutty(PWM0, CH1, a);
+  		  			PWM_Dutty(PWM2, CH0, a);
+  		  			delay(5);
+  				}
+  				a=101;
+  			}
+  		}
+  		PWM_Disable(PWM0, CH1);
+  		PWM_Disable(PWM2, CH0);
+  		eColors = e_blanco;
+  		break;
+
+	case e_blanco:
+  		//white LED
+		PWM_Enable(PWM0, CH1, PWM_L);
+		PWM_Enable(PWM2, CH0, PWM_L);
+		PWM_Enable(PWM2, CH1, PWM_L);
+  		for(a=0; a<=100; a++){
+  			PWM_Dutty(PWM0, CH1, a);
+  			PWM_Dutty(PWM2, CH0, a);
+  			PWM_Dutty(PWM2, CH1, a);
+  			delay(5);
+  			if(a==100){
+  				for(a=100; a>=0; a--){
+  		  			PWM_Dutty(PWM0, CH1, a);
+  		  			PWM_Dutty(PWM2, CH0, a);
+  		  			PWM_Dutty(PWM2, CH1, a);
+  		  			delay(5);
+  				}
+  				a=101;
+  			}
+  		}
+  		PWM_Disable(PWM0, CH1);
+  		PWM_Disable(PWM2, CH0);
+  		PWM_Disable(PWM2, CH1);
   		eColors = e_rojo;
   		break;
 
@@ -387,7 +507,8 @@ void delay(uint16_t time){
 *
 *Salidas:       Ninguna.
 *********************************************************************************************************************************/
-void PWM_TMP0_IRQHandler(void){
-	TPM0->SC |= TPM_SC_TOF(1);
+void TPM0_IRQHandler(void){
+	if(TPM0->STATUS & TPM_STATUS_TOF_MASK){
+		TPM0->STATUS |= TPM_STATUS_TOF_MASK;
+	}
 }
-

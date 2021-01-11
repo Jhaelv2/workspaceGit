@@ -36,25 +36,16 @@ int main (void)
 	//PWM RED LED
 	PWM_TPM_Config(PWM2, EDGE_PWM, PS_4);
 	PWM_CHANNEL_Init(PWM2, CH0, PWM_L, gpiB, 18);
+	//TPM0->SC |= TPM_SC_TOIE_MASK;
+	//TPM0->SC |= TPM_SC_TOF_MASK;
+	//TPM0->CONTROLS[CH1].CnSC |= TPM_CnSC_CHIE_MASK;
+	//NVIC_EnableIRQ(TPM0_IRQn);
+
+
   	while(1)
     {
-
   		maquina_colores();
 
-	}
+    }
 }
-
-
-
-
-/******************************************************************************
-* PORT A Interrupt handler
-******************************************************************************/
-
-void PORTA_IRQHandler()
-{
-	PORTA->PCR[14] |= PORT_PCR_ISF_MASK;			// Clear the interrupt flag
-	DataReady = 1;
-}
-
 

@@ -66,6 +66,8 @@ typedef enum{
 #define PWM_OC_STP			TPM_CnSC_MSA_MASK | TPM_CnSC_ELSB_MASK | TPM_CnSC_ELSA_MASK 	// SET OUTPUT ON MATCH
 #define PWM_OC_POL			TPM_CnSC_MSB_MASK | TPM_CnSC_MSA_MASK | TPM_CnSC_ELSB_MASK 		// PULSE OUTPUT LOW
 #define PWM_OC_POH			TPM_CnSC_MSB_MASK | TPM_CnSC_MSA_MASK | TPM_CnSC_ELSA_MASK		// PULSE OUTPUT HIGH
+//CHANNEL DISABLE
+#define PWM_DISABLE			TPM_CnSC_MSB(0) | TPM_CnSC_MSA(0) | TPM_CnSC_ELSB(0) | TPM_CnSC_ELSA(0)
 
 #define MCGFLLCLK_TIME		41900000u
 
@@ -94,5 +96,6 @@ void PWM_Freq(uint8_t tpm,uint16_t Freq);
 void PWM_Dutty(uint8_t tpm, uint8_t Channel, uint16_t Dutty);
 void maquina_colores(void);
 void delay(uint16_t time);
+void PWM_Disable(uint8_t tpm, uint8_t channel);
 
 #endif /* PWM_H_ */
