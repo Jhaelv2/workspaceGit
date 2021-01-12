@@ -10,7 +10,7 @@ int8_t* Comandos[] =
 {
 		(int8_t*)"BAUDR",  //Baud rate request, pregunta el baud rate actual.
 		(int8_t*)"PWM",
-		(int8_t*)"LED",
+		(int8_t*)"PWMDUTTY",
 		(int8_t*)"ElpePe",
 		(int8_t*)"123456789"
 };
@@ -97,6 +97,11 @@ ecommandList AT_Inquire_The_Command(eCommandType* peCurrentCmdType)
 	}
 	return eUnknownComand;
 }
+
+/********************************************************************************************************
+ * Name: AT_PwmNewDUTTY
+ *******************************************************************************************************/
+
 /********************************************************************************************************
  * Nombre:      AT_Gestion
  * Descripcion: Examina el bufferRx para buscar un comndo AT
@@ -137,7 +142,34 @@ void AT_Gestion(void)
 				}
 		if(flujoAT == eContinuarProcesando)
 			eCommandDetected = AT_Inquire_The_Command(&eDetectedCmdType);
-		if(flujoAT == eContinuarProcesando)
-			letrasAT[2] = 0;
+		switch(eCommandDetected)
+		{
+		case eBAUDR:
+			if(eDetectedCmdType == eWrite);
+
+			else if(eDetectedCmdType == eRead);
+			break;
+		case ePWM:
+			if(eDetectedCmdType == eWrite);
+			else if(eDetectedCmdType == eRead);
+			break;
+		case ePWMDUTTY:
+			if(eDetectedCmdType == eWrite);
+			//Aqui escribe el codigo.
+			else if(eDetectedCmdType == eRead);
+			break;
+		case eElpePe:
+			if(eDetectedCmdType == eWrite);
+			else if(eDetectedCmdType == eRead);
+			break;
+		case e123456789:
+			if(eDetectedCmdType == eWrite);
+			else if(eDetectedCmdType == eRead);
+			break;
+		case eUnknownComand:
+			if(eDetectedCmdType == eWrite);
+			else if(eDetectedCmdType == eRead);
+			break;
+		}
 	}
 }

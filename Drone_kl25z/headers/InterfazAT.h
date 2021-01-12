@@ -28,7 +28,7 @@ typedef enum
 {
 	eBAUDR = 0,
 	ePWM,
-	eLED,
+	ePWMDUTTY,
 	eElpePe,
 	e123456789,
 	eUnknownComand
