@@ -19,6 +19,7 @@ typedef enum{
 	Completo = 0,
 	Procesando,
 	Fallo,
+	Continua,
 }proceso;
 
 #endif /* HEADERS_SERVICIOS_H_ */

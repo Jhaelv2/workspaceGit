@@ -7,8 +7,7 @@
 
 
 #include "UART.h"
-#include <stdio.h>
-sUart gsUart;
+sUart   gsUart;
 uint8_t TAMANOX;
 
 /*-----------------------------------------------------------------------------+
@@ -27,7 +26,7 @@ uint8_t TAMANOX;
 *
 *Salidas:      Ninguna.
 ********************************************************************************************************************************/
-void UARTx_Configuracion(uint8_t * puTxBuffer, uint8_t u8TxBufferSize)
+void UARTx_Configuracion(void)
 {
 	NVIC_ClearPendingIRQ(UART0_IRQn );        //Deshabilita interrupciones UART
 
@@ -59,8 +58,8 @@ void UARTx_Configuracion(uint8_t * puTxBuffer, uint8_t u8TxBufferSize)
 	gsUart.Rx.u16IndiceUltimoDatoUSaliente = 0;
 	gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
 	gsUart.Tx.u16PosicionDatoTransmitido = 0;
-	gsUart.Tx.u8TamanoDeBuffer = u8TxBufferSize;
-    gsUart.Tx.pu8BufferTx = puTxBuffer;
+	gsUart.Tx.u8TamanoDeBuffer = sizeof(gsUart.Tx.u8BufferTx);
+    gsUart.Tx.pu8BufferTx = gsUart.Tx.u8BufferTx;
     gsUart.Rx.Status.Byte = 0;
 	NVIC_EnableIRQ(UART0_IRQn);
 	TAMANOX = sizeof(gsUart);
@@ -78,7 +77,7 @@ void UARTx_Configuracion(uint8_t * puTxBuffer, uint8_t u8TxBufferSize)
 ********************************************************************************************************************************/
 void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 {
-	gsUart.Rx.u8Buffer[gsUart.Rx.u16IndiceUltimoDatoEntrante] = u8ByteRxD;
+	gsUart.Rx.u8BufferRx[gsUart.Rx.u16IndiceUltimoDatoEntrante] = u8ByteRxD;
 	gsUart.Rx.u16IndiceUltimoDatoEntrante ++;
 
 	if(gsUart.Rx.u16IndiceUltimoDatoEntrante == RxBufferSize)
@@ -95,12 +94,12 @@ void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 *
 *Salidas:     uint8_t SUCCES FAIL.
 ********************************************************************************************************************************/
-proceso UART_Pull_Buffer_Rx (uint8_t * pu8Dato)
+proceso UART_Pull_Buffer_Rx (int8_t * pu8Dato)
 {
 	//uint8_t u8Dato = 0;
 	if(gsUart.Rx.Status.Bits.DatoDisponible)
 	{
-		 *pu8Dato  = gsUart.Rx.u8Buffer[gsUart.Rx.u16IndiceUltimoDatoUSaliente];
+		 *pu8Dato  = gsUart.Rx.u8BufferRx[gsUart.Rx.u16IndiceUltimoDatoUSaliente];
 		 gsUart.Rx.u16IndiceUltimoDatoUSaliente ++;
 	     if(gsUart.Rx.u16IndiceUltimoDatoUSaliente == RxBufferSize)
 			 gsUart.Rx.u16IndiceUltimoDatoUSaliente = 0;
@@ -120,7 +119,7 @@ proceso UART_Pull_Buffer_Rx (uint8_t * pu8Dato)
 *
 *Return:       Ninguno.
 ***********************************************************************************************************************************/
-void UART_Buffer_TxServicio(uint8_t * pu8DatoParaBuffer)
+void UART_Buffer_TxServicio(int8_t * pu8DatoParaBuffer)
 {
    *(gsUart.Tx.pu8BufferTx + gsUart.Tx.u16PosicionDatoPortransmitir) = * pu8DatoParaBuffer;
 	gsUart.Tx.u16PosicionDatoPortransmitir++;
@@ -141,9 +140,9 @@ void UART_Buffer_TxServicio(uint8_t * pu8DatoParaBuffer)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_Buffer_Tx (uint8_t * pu8Buffer )
+void UART_Buffer_Tx(int8_t * pu8Buffer )
 {
-	uint8_t ValorDeByte = *pu8Buffer;
+	int8_t ValorDeByte = *pu8Buffer;
 	while(ValorDeByte != '\0')
 	{
 		UART_Buffer_TxServicio(&ValorDeByte);
@@ -164,9 +163,9 @@ void UART_Buffer_Tx (uint8_t * pu8Buffer )
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_Char_To_BufferTx(uint8_t u8Char)
+void UART_Char_To_BufferTx(int8_t u8Char)
 {
-	uint8_t u8CharAString[3];
+	int8_t u8CharAString[3];
 	sprintf(u8CharAString, "%d", u8Char);
 	UART_Buffer_Tx(u8CharAString);
 }
@@ -182,9 +181,9 @@ void UART_Char_To_BufferTx(uint8_t u8Char)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void UART_Short_To_Buffer_Tx (uint16_t u16DatoShort)
+void UART_Short_To_Buffer_Tx (int16_t u16DatoShort)
 {
-	uint8_t u8ShortAString[5];
+	int8_t u8ShortAString[5];
 	sprintf(u8ShortAString,"%u", u16DatoShort);
 	UART_Buffer_Tx(u8ShortAString);
 }
@@ -201,7 +200,7 @@ void UART_Short_To_Buffer_Tx (uint16_t u16DatoShort)
 *
 *Salidas:       Ninguna.
 ********************************************************************************************************************************/
-void  UART_Int_To_Buffer_Tx(uint32_t u32DatoInt)
+void  UART_Int_To_Buffer_Tx(int32_t u32DatoInt)
 {
 	uint8_t u8IntAString[10];
 	sprintf(u8IntAString,"%u", u32DatoInt);
@@ -222,7 +221,7 @@ void  UART_Int_To_Buffer_Tx(uint32_t u32DatoInt)
 ********************************************************************************************************************************/
 void  UART_Float_To_Buffer_Tx(float  u8DatoFloat)
 {
-	uint8_t u8FloatAString[10];
+	int8_t u8FloatAString[10];
 	sprintf(u8FloatAString,"%f", u8DatoFloat);
 	UART_Buffer_Tx(u8FloatAString);
 	return;

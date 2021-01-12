@@ -4,6 +4,7 @@
 #include "I2C.h"
 #include "MMA8451.h"
 #include "PWM.h"
+#include "InterfazAT.h"
 
 /******************************************************************************
 * Functions
@@ -31,12 +32,29 @@ int main (void)
   	Calibrate();
   	Init_pins();
 	PWM_Clocks();
+	UARTx_Configuracion();
 	TPM0_CH1_Init();
 	TPM2_CH0_Int();
 	TPM2_CH1_Int();
+	AT_Size_of_command();
+
+	UART_Push_Buffer_Rx('A');
+	UART_Push_Buffer_Rx('T');
+	UART_Push_Buffer_Rx('+');
+	UART_Push_Buffer_Rx('P');
+	UART_Push_Buffer_Rx('W');
+	UART_Push_Buffer_Rx('M');
+//	UART_Push_Buffer_Rx('B');
+//	UART_Push_Buffer_Rx('A');
+//	UART_Push_Buffer_Rx('U');
+//	UART_Push_Buffer_Rx('D');
+//	UART_Push_Buffer_Rx('R');
+	UART_Push_Buffer_Rx(0x0D);
 
   	while(1)
     {
+  		AT_Gestion();
+
   		if(increaseDuty)
   				{
   					a += 1237;
