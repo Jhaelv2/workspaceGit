@@ -4,7 +4,6 @@
 //#include <PWM.h>
 #include "MKL25Z4.h"
 #include "I2C.h"
-#include "MMA8451.h"
 
 #include "PWM.h"
 #include "InterfazAT.h"
@@ -56,7 +55,7 @@ int main (void)
     {
 
   		AT_Gestion();
-
+  		UART_Gestion_Tx();
   		maquina_colores();
 
     }

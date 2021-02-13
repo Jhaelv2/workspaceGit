@@ -51,8 +51,10 @@ typedef struct
 	int8_t i8QtyOfCommamds;
 }sAT;
 
-void         AT_Gestion             (void);
-ecommandList AT_Inquire_The_Command (eCommandType* peCurrentCmdType);
 void         AT_Size_of_command     (void);
+ecommandList AT_Inquire_The_Command (eCommandType* peCurrentCmdType);
+void         AT_BaudRateRead        (void);
+void         AT_Gestion             (void);
+
 
 #endif /* HEADERS_INTERFAZAT_H_ */
