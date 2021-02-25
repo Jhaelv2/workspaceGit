@@ -36,7 +36,9 @@ typedef union
 		uint8_t Configurando   :1,//B0
 		        Ocupado        :1,//B1
 			    DatoDisponible :1,//B2
-		        BitsRestantes  :5;//B3,B4,B5,B6,B7
+		        DatoAt         :1,//B3
+		        BitsRestantes  :4;//B3,B4,B5,B6,B7
+
 
 	}Bits;
 }uEstadoDeTransmicion;

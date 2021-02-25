@@ -78,8 +78,10 @@ void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 	gsUart.Rx.u16IndiceUltimoDatoEntrante ++;
 
 	if(gsUart.Rx.u16IndiceUltimoDatoEntrante == RxBufferSize)
-	gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
+		gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
 	gsUart.Rx.Status.Bits.DatoDisponible = 1;
+	if(u8ByteRxD == '\r')
+		gsUart.Rx.Status.Bits.DatoAt = 1;
 	return;
 }
 /********************************************************************************************************************************
@@ -217,42 +219,36 @@ void UART_Gestion_Tx(void)
 {
 	static uint8_t eBufferTx = SMTX_ConsultaDatoDisponible;
 
-	switch(eBufferTx)
-	{
-    case SMTX_ConsultaDatoDisponible:
-    	if(gsUart.Tx.u16PosicionDatoPortransmitir != gsUart.Tx.u16PosicionDatoTransmitido)
-    	{
-    		while(gsUart.Tx.u16PosicionDatoPortransmitir != gsUart.Tx.u16PosicionDatoTransmitido)
-    		{
-    		    (UART0->S1);
-    		    (UART0->D);
-    	    	UART0->D   = gsUart.Tx.pu8BufferTx[gsUart.Tx.u16PosicionDatoTransmitido];
-    	    	gsUart.Tx.u16PosicionDatoTransmitido++;
-    		}
-    		eBufferTx = SMTX_ConsultaTransmicionCompleta;
-    	}
-    	break;
+		switch(eBufferTx)
+		{
+	    case SMTX_ConsultaDatoDisponible:
+	    	if(gsUart.Tx.u16PosicionDatoPortransmitir != gsUart.Tx.u16PosicionDatoTransmitido)
+	    	{
+	    		eBufferTx = SMTX_TtansmiteDatoActual;
+	    	}
+	    	break;
 
-//    case SMTX_TtansmiteDatoActual:
-//	    (UART0->S1);
-//	    (UART0->D);
-//    	UART0->D   = gsUart.Tx.pu8BufferTx[gsUart.Tx.u16PosicionDatoTransmitido];
-//    	eBufferTx = SMTX_ConsultaTransmicionCompleta;
-//    	break;
+	    case SMTX_TtansmiteDatoActual:
+		    (UART0->S1);
+		    (UART0->D);
+		    while(!(UART0->S1 & UART_S1_TDRE_MASK)){}
+	    	UART0->D   = gsUart.Tx.pu8BufferTx[gsUart.Tx.u16PosicionDatoTransmitido];
+	    	eBufferTx = SMTX_ConsultaTransmicionCompleta;
+	    	break;
 
-    case SMTX_ConsultaTransmicionCompleta:
-    	if(UART0->S1 & UART_S1_TDRE_MASK)
-    	{
-    		//gsUart.Tx.u16PosicionDatoTransmitido++;
-    		if(gsUart.Tx.u16PosicionDatoTransmitido == gsUart.Tx.u8TamanoDeBuffer)
-    			gsUart.Tx.u16PosicionDatoTransmitido = 0;
-    		eBufferTx = SMTX_ConsultaDatoDisponible;
-    		UART0->C2 |=  UART_C2_TE(0);
-    		UART0->C2 |=  UART_C2_TE(1);
-    	}
-    	break;
-	}
-	return;
+	    case SMTX_ConsultaTransmicionCompleta:
+	    	if(UART0->S1 & UART_S1_TDRE_MASK)
+	    	{
+	    		gsUart.Tx.u16PosicionDatoTransmitido++;
+	    		if(gsUart.Tx.u16PosicionDatoTransmitido == gsUart.Tx.u8TamanoDeBuffer)
+	    			gsUart.Tx.u16PosicionDatoTransmitido = 0;
+	    		eBufferTx = SMTX_ConsultaDatoDisponible;
+	    		UART0->C2 |=  UART_C2_TE(0);
+	    		UART0->C2 |=  UART_C2_TE(1);
+	    	}
+	    	break;
+		}
+		return;
 }
 /********************************************************************************************************************************
 *Nombre:        UART0_BaudRate_Consulta
@@ -319,5 +315,5 @@ void UART0_Nuevo_BaudRate(uint32_t u8BaudRate)
 void UART0_IRQHandler(void)
 {
 	if(UART0->S1 & UART_S1_RDRF_MASK)             //Consulta la badera RDRF(Paso 1 pra borrar bandera RDRF)
-	UART_Push_Buffer_Rx(UART0->D);
+		UART_Push_Buffer_Rx(UART0->D);
 }

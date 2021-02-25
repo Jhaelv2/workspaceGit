@@ -126,11 +126,17 @@ void AT_Gestion(void)
 	switch(flujoAT)
 	{
 	case eATDesicion:
-		while(indiceAyT < 2)
+		if(gsUart.Rx.Status.Bits.DatoAt == 1)
 		{
-			if(UART_Pull_Buffer_Rx(&letrasAT[indiceAyT])==Completo);
-			indiceAyT++;
+			while(indiceAyT < 2)
+			{
+				if(UART_Pull_Buffer_Rx(&letrasAT[indiceAyT])==Completo);
+				indiceAyT++;
+			}
 		}
+		else
+			break;
+
 		if((letrasAT[0] == 'A') && (letrasAT[1] == 'T'))
 			if(UART_Pull_Buffer_Rx(&letrasAT[0]) == Completo)
 				switch (letrasAT[0])
@@ -177,6 +183,10 @@ void AT_Gestion(void)
 			else if(eDetectedCmdType == eRead);
 			break;
 		}
+    case eComandoProcesado:
+		flujoAT = eATDesicion;
+		gsUart.Rx.Status.Bits.DatoAt = 0;
 	}
+
 }
 
