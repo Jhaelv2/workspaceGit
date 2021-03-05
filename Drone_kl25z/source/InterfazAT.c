@@ -53,7 +53,7 @@ void AT_Size_of_command(void)
  * Name:        AT_Inquire_The_Command
  * Description: First it stores
  ********************************************************************************************/
-ecommandList AT_Inquire_The_Command(eCommandType* peCurrentCmdType)
+uint8_t AT_Inquire_The_Command(uint8_t *peCurrentCmdType)
 {
 	int8_t i8TempCommandRetainer[gsAT.sizeOfBigestcommand], i8CurrentCommandSize = 0;
 	ecommandList eCurrCommandIndex = eBAUDR;
@@ -106,7 +106,26 @@ ecommandList AT_Inquire_The_Command(eCommandType* peCurrentCmdType)
  *******************************************************************************************************/
 void AT_BaudRateRead(void)
 {
+	UART0_BaudRate_Consulta();
+}
 
+/********************************************************************************************************
+ * Name: AT_BaudRateWrite
+ *******************************************************************************************************/
+void AT_BaudRateWrite(void)
+{
+	uint8_t  contador = 0;
+	int8_t   numeroActual[10];
+	uint32_t numeroResultante = 0;
+	while ((numeroActual[contador] != '\r') && (contador < 10))
+	{
+		if(UART_Pull_Buffer_Rx(&numeroActual[contador]) == Completo);
+		contador++;
+	}
+	numeroActual[contador] = '\0';
+	numeroResultante = atoi((char*)numeroActual);
+	UART_Buffer_Tx((int8_t*)"\n\rhello\n\r");
+	UART0_Nuevo_BaudRate(numeroResultante);
 }
 /********************************************************************************************************
  * Nombre:      AT_Gestion
@@ -138,6 +157,7 @@ void AT_Gestion(void)
 			break;
 
 		if((letrasAT[0] == 'A') && (letrasAT[1] == 'T'))
+		{
 			if(UART_Pull_Buffer_Rx(&letrasAT[0]) == Completo)
 				switch (letrasAT[0])
 				{
@@ -148,44 +168,79 @@ void AT_Gestion(void)
 				case '+':
 					flujoAT = eContinuarProcesando;
 					break;
-				default :
-					flujoAT = eComandoProcesado;
-					//break;
+				case '?':
+				    flujoAT = eContinuarProcesando;
+				    break;
+			    default :
+					flujoAT = ComandoFallido;
+					break;
 				}
-		if(flujoAT == eContinuarProcesando)
-			eCommandDetected = AT_Inquire_The_Command(&eDetectedCmdType);
-		switch(eCommandDetected)
+		}
+		else
 		{
-		case eBAUDR:
-			if(eDetectedCmdType == eWrite);
-
-			else if(eDetectedCmdType == eRead);
-			break;
-		case ePWM:
-			if(eDetectedCmdType == eWrite);
-			else if(eDetectedCmdType == eRead);
-			break;
-		case ePWMDUTTY:
-			if(eDetectedCmdType == eWrite);
-			//Aqui escribe el codigo.
-			else if(eDetectedCmdType == eRead);
-			break;
-		case eElpePe:
-			if(eDetectedCmdType == eWrite);
-			else if(eDetectedCmdType == eRead);
-			break;
-		case e123456789:
-			if(eDetectedCmdType == eWrite);
-			else if(eDetectedCmdType == eRead);
-			break;
-		case eUnknownComand:
-			if(eDetectedCmdType == eWrite);
-			else if(eDetectedCmdType == eRead);
+			flujoAT = ComandoFallido;
 			break;
 		}
+
+		if(flujoAT == eContinuarProcesando)
+		{
+			eCommandDetected = AT_Inquire_The_Command(&eDetectedCmdType);
+			switch(eCommandDetected)
+			{
+			case eBAUDR:
+				UART_Buffer_Tx((int8_t*)"\n\rYOU SIR ARE A BIG pussy\n\r");
+				if(eDetectedCmdType == eWrite)
+					AT_BaudRateWrite();
+				else if(eDetectedCmdType == eRead)
+					AT_BaudRateRead();
+				break;
+			case ePWM:
+				UART_Buffer_Tx((int8_t*)"\n\riii q puto\n\r");
+				if(eDetectedCmdType == eWrite);
+				else if(eDetectedCmdType == eRead);
+				break;
+		    case ePWMDUTTY:
+		    	UART_Buffer_Tx((int8_t*)"\n\rsi lees esto eres gay\n\r");
+			    if(eDetectedCmdType == eWrite);
+			     //Aqui escribe el codigo.
+			    else if(eDetectedCmdType == eRead);
+			    break;
+		     case eElpePe:
+		    	 UART_Buffer_Tx((int8_t*)"\n\rYOU are such A BIG FAGGOT\n\r");
+			    if(eDetectedCmdType == eWrite);
+			    else if(eDetectedCmdType == eRead);
+			    break;
+//		    case e123456789:
+//			    if(eDetectedCmdType == eWrite);
+//			    else if(eDetectedCmdType == eRead);
+//			    break;
+//		    case eUnknownComand:
+//			    if(eDetectedCmdType == eWrite);
+//			    else if(eDetectedCmdType == eRead);
+//			    break;
+			default:
+				UART_Buffer_Tx((int8_t*)"\n\rYOU SIR ARE A BIG FAGGOT\n\r");
+				break;
+		    }
+		}
+		if(UART_Pull_Buffer_Rx(&letrasAT[0])==Completo);
+		flujoAT = eATDesicion;
+		gsUart.Rx.Status.Bits.DatoAt = 0;
+		break;
+
+	case ComandoFallido:
+		while((letrasAT[0] != '\r') ||  (gsUart.Rx.Status.Bits.DatoDisponible = 0))
+		{
+			if(UART_Pull_Buffer_Rx(&letrasAT[0])==Completo);
+		}
+		flujoAT = eATDesicion;
+		gsUart.Rx.Status.Bits.DatoAt = 0;
+		break;
+
     case eComandoProcesado:
 		flujoAT = eATDesicion;
 		gsUart.Rx.Status.Bits.DatoAt = 0;
+		break;
 	}
 
 }

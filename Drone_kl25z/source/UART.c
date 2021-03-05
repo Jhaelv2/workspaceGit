@@ -80,7 +80,7 @@ void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 	if(gsUart.Rx.u16IndiceUltimoDatoEntrante == RxBufferSize)
 		gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
 	gsUart.Rx.Status.Bits.DatoDisponible = 1;
-	if(u8ByteRxD == '\r')
+	if((u8ByteRxD == '\r'))
 		gsUart.Rx.Status.Bits.DatoAt = 1;
 	return;
 }
@@ -270,7 +270,9 @@ void UART0_BaudRate_Consulta(void)
 	u8OSR         = (UART0->C4 & 0b00011111);
 
 	u32BaudRateActual = ((DEFAULT_SYSTEM_CLOCK)/((u8OSR+1)*u8SBRTotalVal));
+	UART_Buffer_Tx((int8_t*)"\n\r");
 	UART_Short_To_Buffer_Tx(u32BaudRateActual);
+	UART_Buffer_Tx((int8_t*)"\n\r");
 	return;
 }
 /********************************************************************************************************************************
@@ -282,25 +284,26 @@ void UART0_BaudRate_Consulta(void)
 *********************************************************************************************************************************/
 void UART0_Nuevo_BaudRate(uint32_t u8BaudRate)
 {
-	float    u32NuevoSBR;
+	uint32_t    u32NuevoSBR;
 	uint32_t u8NuevoSBRH;
 
-	u32NuevoSBR = (DEFAULT_SYSTEM_CLOCK/((4) * ((float)u8BaudRate)));
+	u32NuevoSBR = (DEFAULT_SYSTEM_CLOCK/((8) * (u8BaudRate)));
     if(u32NuevoSBR > 255)
     {
     	u8NuevoSBRH  = ((uint32_t)u32NuevoSBR);
     	u8NuevoSBRH &= 0x00000F00;
     	u8NuevoSBRH  = u8NuevoSBRH >> 8;
+    	u32NuevoSBR &= 0x000000FF;
     }
     else
     	u8NuevoSBRH = 0;
 
-	UART0->C2  |= UART_C2_RIE(0) | UART_C2_TE(0)    //Deshabilita las funciones Rx y Tx
-			   |  UART_C2_RE(0);                    //Deshabilita sus correspondientes interrupciones
+	UART0->C2  = UART_C2_RIE(0) & UART_C2_TE(0)    //Deshabilita las funciones Rx y Tx
+			   &  UART_C2_RE(0);
 
-	UART0->C4  = UART0_C4_OSR((uint16_t)4);
-	UART0->BDH = UART_BDH_SBR((uint16_t)u8NuevoSBRH);
-	UART0->BDL = UART_BDL_SBR((uint16_t)u32NuevoSBR);
+	UART0->C4  = UART0_C4_OSR(7);
+	UART0->BDH = UART_BDH_SBR((uint8_t)u8NuevoSBRH);
+	UART0->BDL = UART_BDL_SBR((uint8_t)u32NuevoSBR);
 
 	UART0->C2 |= UART_C2_RIE(1)
 			  |  UART_C2_TE(1)

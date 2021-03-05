@@ -11,6 +11,7 @@
 
 #include "MKL25Z4.h"
 #include "UART.h"
+#include <stdlib.h>
 
 
 extern int8_t* Comandos[];
@@ -18,7 +19,7 @@ extern int8_t* Comandos[];
 typedef enum
 {
 	eATDesicion = 0,
-	eOkoComando,
+	ComandoFallido,
 	eIdentificaComando,
 	eContinuarProcesando,
 	eComandoProcesado,
@@ -52,8 +53,9 @@ typedef struct
 }sAT;
 
 void         AT_Size_of_command     (void);
-ecommandList AT_Inquire_The_Command (eCommandType* peCurrentCmdType);
+uint8_t      AT_Inquire_The_Command (uint8_t *peCurrentCmdType);
 void         AT_BaudRateRead        (void);
+void         AT_BaudRateWrite       (void);
 void         AT_Gestion             (void);
 
 
