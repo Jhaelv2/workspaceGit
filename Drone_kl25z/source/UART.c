@@ -119,7 +119,7 @@ void UART_Buffer_TxServicio(int8_t * pu8DatoParaBuffer)
 
 	if(gsUart.Tx.u16PosicionDatoPortransmitir == gsUart.Tx.u8TamanoDeBuffer)
 	gsUart.Tx.u16PosicionDatoPortransmitir = 0;
-	gsUart.Rx.Status.Bits.DatoDisponible = 1;
+	//gsUart.Rx.Status.Bits.DatoDisponible = 1;
 	return;
 }
 /********************************************************************************************************************************

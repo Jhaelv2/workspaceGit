@@ -49,7 +49,7 @@ int main (void)
 	//TPM0->SC |= TPM_SC_TOF_MASK;
 	//TPM0->CONTROLS[CH1].CnSC |= TPM_CnSC_CHIE_MASK;
 	//NVIC_EnableIRQ(TPM0_IRQn);
-	//UART_Buffer_Tx((int8_t*)"\n\rOk\n\r");
+	//UART_Buffer_Tx((int8_t*)"125");
 
   	while(1)
     {

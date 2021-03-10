@@ -132,7 +132,11 @@ void AT_BaudRateWrite(void)
  * Descripcion: Examina el bufferRx para buscar un comndo AT
  * Parametros:  Ninguno-
  * Retornos:    NInguno.
- * ToDo:        Averiguar el tamano de el comando introducido.
+ * ToDo:        Asegurate de que al terminar de procesar cualquier comando;
+ *              1: No queden otros caracteres residuales antes del '\r' en caso de que si
+ *              el comando es fallido
+ *
+ *
  *******************************************************************************************************/
 void AT_Gestion(void)
 {
@@ -172,12 +176,15 @@ void AT_Gestion(void)
 				    flujoAT = eContinuarProcesando;
 				    break;
 			    default :
+			    	UART_Buffer_Tx((int8_t*)"\n\rFallo en antes de procesar\n\r");
 					flujoAT = ComandoFallido;
 					break;
 				}
 		}
 		else
 		{
+	    	UART_Buffer_Tx((int8_t*)"\n\rFAT incompleto\n\r");
+
 			flujoAT = ComandoFallido;
 			break;
 		}
@@ -193,22 +200,26 @@ void AT_Gestion(void)
 					AT_BaudRateWrite();
 				else if(eDetectedCmdType == eRead)
 					AT_BaudRateRead();
+				flujoAT = eComandoProcesado;
 				break;
 			case ePWM:
 				UART_Buffer_Tx((int8_t*)"\n\riii q puto\n\r");
 				if(eDetectedCmdType == eWrite);
 				else if(eDetectedCmdType == eRead);
+				flujoAT = ComandoFallido;
 				break;
 		    case ePWMDUTTY:
 		    	UART_Buffer_Tx((int8_t*)"\n\rsi lees esto eres gay\n\r");
 			    if(eDetectedCmdType == eWrite);
 			     //Aqui escribe el codigo.
 			    else if(eDetectedCmdType == eRead);
+			    flujoAT = ComandoFallido;
 			    break;
 		     case eElpePe:
 		    	 UART_Buffer_Tx((int8_t*)"\n\rYOU are such A BIG FAGGOT\n\r");
 			    if(eDetectedCmdType == eWrite);
 			    else if(eDetectedCmdType == eRead);
+			    flujoAT = ComandoFallido;
 			    break;
 //		    case e123456789:
 //			    if(eDetectedCmdType == eWrite);
@@ -219,17 +230,23 @@ void AT_Gestion(void)
 //			    else if(eDetectedCmdType == eRead);
 //			    break;
 			default:
-				UART_Buffer_Tx((int8_t*)"\n\rYOU SIR ARE A BIG FAGGOT\n\r");
+				UART_Buffer_Tx((int8_t*)"\n\rFallo en Procesando\n\r");
+				flujoAT = ComandoFallido;
 				break;
 		    }
+			if(UART_Pull_Buffer_Rx(&letrasAT[0])==Completo);
+//			{
+//				if(letrasAT[0] != '\r')
+//					flujoAT = ComandoFallido;
+//			}
 		}
-		if(UART_Pull_Buffer_Rx(&letrasAT[0])==Completo);
-		flujoAT = eATDesicion;
-		gsUart.Rx.Status.Bits.DatoAt = 0;
+		//
+		//flujoAT = eATDesicion;
+		//gsUart.Rx.Status.Bits.DatoAt = 0;
 		break;
 
 	case ComandoFallido:
-		while((letrasAT[0] != '\r') ||  (gsUart.Rx.Status.Bits.DatoDisponible = 0))
+		while((letrasAT[0] != '\r') && (gsUart.Rx.Status.Bits.DatoDisponible != 0))
 		{
 			if(UART_Pull_Buffer_Rx(&letrasAT[0])==Completo);
 		}
