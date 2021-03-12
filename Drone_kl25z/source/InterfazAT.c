@@ -57,6 +57,7 @@ uint8_t AT_Inquire_The_Command(uint8_t *peCurrentCmdType)
 {
 	int8_t i8TempCommandRetainer[gsAT.sizeOfBigestcommand], i8CurrentCommandSize = 0;
 	ecommandList eCurrCommandIndex = eBAUDR;
+	uint8_t tempHolder;
 	*peCurrentCmdType = eUnknown;
 	while((i8CurrentCommandSize < (gsAT.sizeOfBigestcommand +1)) && (*peCurrentCmdType == eUnknown))
 	{
@@ -85,6 +86,15 @@ uint8_t AT_Inquire_The_Command(uint8_t *peCurrentCmdType)
 	}
 	i8TempCommandRetainer[(i8CurrentCommandSize - 1)] = '\0';
 
+	if(*peCurrentCmdType == eRead)
+	{
+		if(UART_Pull_Buffer_Rx(&tempHolder) == Completo)
+		{
+			if(tempHolder != '\r')
+				return eUnknownComand;
+		}
+	}
+
 	if((*peCurrentCmdType != eUnknown) && (*peCurrentCmdType != eUnrrecognized))
 	{
 
@@ -106,6 +116,7 @@ uint8_t AT_Inquire_The_Command(uint8_t *peCurrentCmdType)
  *******************************************************************************************************/
 void AT_BaudRateRead(void)
 {
+	UART_Buffer_Tx((int8_t*)"\n\rEl baud rate actual es: \n\r");
 	UART0_BaudRate_Consulta();
 }
 
@@ -195,7 +206,6 @@ void AT_Gestion(void)
 			switch(eCommandDetected)
 			{
 			case eBAUDR:
-				UART_Buffer_Tx((int8_t*)"\n\rYOU SIR ARE A BIG pussy\n\r");
 				if(eDetectedCmdType == eWrite)
 					AT_BaudRateWrite();
 				else if(eDetectedCmdType == eRead)
