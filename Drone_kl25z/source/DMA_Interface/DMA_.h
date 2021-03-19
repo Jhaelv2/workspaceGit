@@ -14,6 +14,9 @@ del Dron-Carga beta 0
 #ifndef DMA__H_
 #define DMA__H_
 
+#include "MKL25Z4.h"
+#include "UART.h"
+
 /*   System Headers   	*/
 /*   Own Headers   		*/
 /*****************************************************************************/

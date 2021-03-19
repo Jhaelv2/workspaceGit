@@ -7,6 +7,7 @@
 
 #include "PWM.h"
 #include "InterfazAT.h"
+#include "DMA_.h"
 
 
 /******************************************************************************
@@ -31,11 +32,9 @@ _Bool increaseDuty = true;
 
 int main (void)
 {
-
-
 	UARTx_Configuracion();
 	AT_Size_of_command();
-
+	DmaConfiguracion();
 	//PWM BLUE LED
 //	   PWM_TPM_Config(PWM0, CENTER_PWM, PS_4);
 //	   PWM_CHANNEL_Init(PWM0, CH1, PWM_L, gpiD, 1);
@@ -53,7 +52,6 @@ int main (void)
 
   	while(1)
     {
-
   		AT_Gestion();
   		UART_Gestion_Tx();
   		//maquina_colores();

@@ -37,6 +37,7 @@ void UARTx_Configuracion(void)
 	PORTA->PCR[1] |= PORT_PCR_MUX(2);                 //Puerto D pin 2 como alternativa 3 UART_2 Rx
 	PORTA->PCR[2] |= PORT_PCR_MUX(2);                 //Puerto D pin 3 como alternativa 3 UART_2 Tx
 
+
 	UART0->C2  = UART_C2_RIE(0) & UART_C2_TE(0)    //Deshabilita las funciones Rx y Tx
 			   &  UART_C2_RE(0);                    //Deshabilita sus correspondientes interrupciones
 
@@ -53,6 +54,9 @@ void UARTx_Configuracion(void)
 	UART0->C2 |= UART_C2_RIE(1)
 			  |  UART_C2_TE(1)
 			  |  UART_C2_RE(1);
+
+	UART0->C5 |= UART0_C5_RDMAE(1);
+
 	gsUart.Rx.u16IndiceUltimoDatoUSaliente = 0;
 	gsUart.Rx.u16IndiceUltimoDatoEntrante = 0;
 	gsUart.Tx.u16PosicionDatoTransmitido = 0;
@@ -74,7 +78,7 @@ void UARTx_Configuracion(void)
 ********************************************************************************************************************************/
 void UART_Push_Buffer_Rx(uint8_t u8ByteRxD)
 {
-	gsUart.Rx.u8BufferRx[gsUart.Rx.u16IndiceUltimoDatoEntrante] = u8ByteRxD;
+	//gsUart.Rx.u8BufferRx[gsUart.Rx.u16IndiceUltimoDatoEntrante] = u8ByteRxD;
 	gsUart.Rx.u16IndiceUltimoDatoEntrante ++;
 
 	if(gsUart.Rx.u16IndiceUltimoDatoEntrante == RxBufferSize)
