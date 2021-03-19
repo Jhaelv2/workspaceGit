@@ -12,12 +12,14 @@ del Dron-Carga beta 0
 */
 
 /*   System Headers   	*/
+
 /*   Used Headers   	*/
+
 /*   Own Headers   		*/
-#include "/Drone_kl25z/source/DMA_Interface/DMA_.c"
 #include "DMA__cfg.h"
 #include "DMA__def.h"
 #include "DMA_.h"
+
 /*     [EXPORTED]		*/
 
 /*public variables*/
