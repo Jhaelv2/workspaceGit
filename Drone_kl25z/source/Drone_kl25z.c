@@ -1,12 +1,12 @@
+#include <AT/InterfazAT.h>
+#include <I2C/I2C.h>
+#include <PWM/PWM.h>
 #include <stdio.h>
 #include <stdbool.h>
 //#include <PIT.h>
 //#include <PWM.h>
 #include "MKL25Z4.h"
-#include "I2C.h"
 
-#include "PWM.h"
-#include "InterfazAT.h"
 
 
 /******************************************************************************

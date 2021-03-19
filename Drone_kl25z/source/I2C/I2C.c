@@ -5,7 +5,7 @@
  *      Author: Hugo
  */
 
-#include "I2C.h"
+#include <I2C/I2C.h>
 
 void I2C_WriteRegister(unsigned char u8SlaveAddress, unsigned char u8RegisterAddress, /*unsigned*/ char u8Data)
 {

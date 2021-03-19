@@ -5,7 +5,7 @@
  *      Author: Madera
  */
 
-#include <PWM.h>
+#include <PWM/PWM.h>
 
 PORT_Type port;
 int a,b,c,d = 0;

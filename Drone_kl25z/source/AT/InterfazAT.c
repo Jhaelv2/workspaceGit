@@ -4,7 +4,7 @@
  *  Created on: 22 dic. 2020
  *      Author: Hugo
  */
-#include "InterfazAT.h"
+#include <AT/InterfazAT.h>
 #include  <string.h>
 int8_t* Comandos[] =
 {

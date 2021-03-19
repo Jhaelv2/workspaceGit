@@ -1,8 +1,8 @@
 /******************************************************************************
 * Accelerometer initialization function
 ******************************************************************************/
-#include "MMA8451.h"
-#include "I2C.h"
+#include <ACEL/MMA8451.h>
+#include <I2C/I2C.h>
 
 unsigned char Xoffset, Yoffset, Zoffset;
 
