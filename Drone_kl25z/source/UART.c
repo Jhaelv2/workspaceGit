@@ -288,7 +288,7 @@ void UART0_BaudRate_Consulta(void)
 *********************************************************************************************************************************/
 void UART0_Nuevo_BaudRate(uint32_t u8BaudRate)
 {
-	uint32_t    u32NuevoSBR;
+	uint32_t u32NuevoSBR;
 	uint32_t u8NuevoSBRH;
 
 	u32NuevoSBR = (DEFAULT_SYSTEM_CLOCK/((8) * (u8BaudRate)));

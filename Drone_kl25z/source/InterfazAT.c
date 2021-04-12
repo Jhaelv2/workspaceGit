@@ -57,7 +57,7 @@ uint8_t AT_Inquire_The_Command(uint8_t *peCurrentCmdType)
 {
 	int8_t i8TempCommandRetainer[gsAT.sizeOfBigestcommand], i8CurrentCommandSize = 0;
 	ecommandList eCurrCommandIndex = eBAUDR;
-	uint8_t tempHolder;
+	int8_t tempHolder;
 	*peCurrentCmdType = eUnknown;
 	while((i8CurrentCommandSize < (gsAT.sizeOfBigestcommand +1)) && (*peCurrentCmdType == eUnknown))
 	{

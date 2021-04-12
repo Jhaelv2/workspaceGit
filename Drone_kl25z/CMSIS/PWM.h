@@ -20,16 +20,24 @@ typedef enum{
 	e_blanco
 }eColors;
 
-#define PWM0				0U
-#define PWM1				1U
-#define PWM2				2U
+#define Microsegundos 1000000
+#define Milisegundos  1000
 
-#define CH0					0U
-#define CH1					1U
-#define CH2					2U
-#define CH3					3U
-#define CH4					4U
-#define CH5					5U
+typedef enum{
+	eTPM0  = 0,
+	eTPM1,
+	eTPM2,
+}eTpmModulos;
+
+typedef enum{
+	eCH0 = 0,
+	eCH1,
+	eCH2,
+	eCH3,
+	eCH4,
+	eCH5,
+}eTpmChanels;
+
 
 #define gpiA				0u
 #define gpiB				1u
@@ -37,21 +45,6 @@ typedef enum{
 #define	gpiD				3u
 #define gpiE				4u
 
-#define	PS_1				0U
-#define	PS_2				1U
-#define	PS_4				2U
-#define	PS_8				3U
-#define	PS_16				4U
-#define	PS_32				5U
-#define PS_64				6U
-#define PS_128				7U
-
-#define EDGE_PWM			0U
-#define CENTER_PWM			1U
-
-#define LPTPM_DISABLE		0U
-#define LPTPM_CLK			1U		//LPTPM COUNTER INCREMENTS ON EVERY LPTPM COUNTER CLOCK
-#define LPTPM_EXTCLK		2U		//LPTPM COUNTER INCREMENTS ON RISING EDGE OF LPTPM_EXTCLK SYNCHRONIZED TO THE LPTPM COUNTER CLOCK
 
 #define TPM_CLK_DISABLED	0U		//DISABLES TPM CLK
 #define TPM_MCGFLLCLK		1U		//ENABLE TPM CLK MCGFLLCLK OR MCGPLLCLK/2
@@ -90,12 +83,11 @@ typedef enum{
 							TPM0->CONTROLS[3].CnV = 4568;\
 							TPM0->SC |= TPM_SC_CMOD(1)|TPM_SC_PS(0);
 
-void PWM_TPM_Config(uint8_t tpm, _Bool align, uint8_t prescaler);
-void PWM_CHANNEL_Init(uint8_t tpm, uint8_t channel, uint8_t Mode, uint8_t  gpio, int pin);
-void PWM_Freq(uint8_t tpm,uint16_t Freq);
-void PWM_Dutty(uint8_t tpm, uint8_t Channel, uint16_t Dutty);
-void maquina_colores(void);
-void delay(uint16_t time);
-void PWM_Disable(uint8_t tpm, uint8_t channel);
+void     PwmTpmConfig       (uint32_t PeriodoLPTMW,uint16_t TiempoExtendido, uint8_t ModuloTPM, uint8_t canalTPM, uint16_t DutyCicle);
+void     PwmChannelInit     (uint8_t TpmModuloN, uint16_t CuentasPorTiempo, uint8_t Channel,uint16_t DutyCicleTiempopin);
+void     PWM_Dutty          (uint8_t tpm, uint8_t Channel, uint16_t Dutty);
+void     maquina_colores    (void);
+void     delay              (uint16_t time);
+uint16_t AjusteTiempoCuenta (uint32_t DivisorDeTiempo, uint8_t *Prescaler);
 
 #endif /* PWM_H_ */
